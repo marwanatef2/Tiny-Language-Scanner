@@ -44,11 +44,11 @@ def isSpecialSymbol (char):
     elif char == '{':
         return 'OPEN CURLY BRACES'
     elif char == '}':
-        return 'CLOSE CURLY BRACES'
+        return 'CLOSED CURLY BRACES'
     elif char == ';':
         return 'SEMICOLON'
-    elif char == ':=':
-        return 'ASSIGN'
+    elif char == ':':
+        return 'COLON'
     # not special symbol
     else :
         return False 
@@ -63,6 +63,7 @@ def isFloat(string):
 with open('input.txt', 'r') as reader:
 
     first_line = True
+    in_a_comment = False
 
     # iterate over input lines
     for line in reader:
@@ -72,10 +73,12 @@ with open('input.txt', 'r') as reader:
             line += ' '
 
         # dictionary of {tokenvalue : tokentype}
-        tokens = {}
+        tokens = dict()
         # string to add characters in to get a complete word
         identifier = ''
         
+        previous_char = ''
+
         # iterate over characters per line input
         for char in line:
 
@@ -95,7 +98,7 @@ with open('input.txt', 'r') as reader:
 
                 # case random word or empty string
                 else:
-
+                    
                     # possible identifier if starting with letter
                     # more than 1 character
                     if ( len(identifier)>1 and identifier[0].isalpha() ):
@@ -123,13 +126,52 @@ with open('input.txt', 'r') as reader:
                         tokens[identifier] = 'Error!'
                         identifier = ''
 
-                # append to tokens dictionary
-                if not char.isspace():
-                    tokens[char]=isSpecialSymbol(char)
+                # check for comments
+                if isSpecialSymbol(char)=='OPEN CURLY BRACES':
+                    # {
+                    in_a_comment = True
+                    # indicate start of comment
+                    tokens[char]=isSpecialSymbol(char)+' - Start Comment'
+                elif isSpecialSymbol(char)=='CLOSED CURLY BRACES':
+                    in_a_comment = False
+                    # indicate end of comment just in case it started already
+                    if '{' in tokens.keys():
+                        tokens[char]=isSpecialSymbol(char)+' - End Comment'
+               
+                elif isSpecialSymbol(char)=='COLON':
+                    previous_char = ':'
+                elif isSpecialSymbol(char)=='SMALLER THAN sign':
+                    previous_char = '<'
+                elif isSpecialSymbol(char)=='GREATER THAN sign':
+                    previous_char = '>'
+                elif isSpecialSymbol(char)=='EQUAL sign':
+                    if previous_char == ':':
+                        tokens[':=']='ASSIGN'
+                        previous_char=''
+                    elif previous_char == '<':
+                        tokens['<=']='SMALLER THAN or EQUAL sign'
+                        previous_char=''
+                    elif previous_char == '>':
+                        tokens['>=']='GREATER THAN or EQUAL sign'
+                        previous_char=''
+                    else:
+                        tokens[char]=isSpecialSymbol(char)  
+                    
+                # else append to tokens dictionary
+                else:
+                    # check first for previous char
+                    if previous_char == '<' or previous_char == '>':
+                        tokens[previous_char]=isSpecialSymbol(previous_char)
+                        previous_char=''
+                    # then append if not space
+                    if not char.isspace():
+                        tokens[char]=isSpecialSymbol(char)
             
             # any other character 
             else:
-                identifier += char
+                # skip if in a comment
+                if not in_a_comment:
+                    identifier += char
 
         # to overwrite the output file just in case it's the 1st line
         if first_line:
