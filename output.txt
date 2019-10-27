@@ -1,0 +1,10 @@
+marwan : Identifier
+= : EQUAL sign
+10 : Number
+* : MULTIPLY sign
+zeez : Identifier
+--------------------
+lol : Identifier
+/ : DIVIDE sign
+4 : Number
+--------------------
