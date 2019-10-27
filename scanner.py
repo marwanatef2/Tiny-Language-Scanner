@@ -40,7 +40,11 @@ def isSpecialSymbol (char):
     elif char == '(':
         return 'OPEN BRACKET'
     elif char == ')':
-        return 'CLOSE BRACKET'
+        return 'CLOSED BRACKET'
+    elif char == '[':
+        return 'OPEN SQUARE BRACKET'
+    elif char == ']':
+        return 'CLOSED SQUARE BRACKET'
     elif char == '{':
         return 'OPEN CURLY BRACES'
     elif char == '}':
@@ -49,6 +53,8 @@ def isSpecialSymbol (char):
         return 'SEMICOLON'
     elif char == ':':
         return 'COLON'
+    elif char == '!':
+        return 'EXCLAMATION'
     # not special symbol
     else :
         return False 
@@ -81,7 +87,7 @@ with open('input.txt', 'r') as reader:
 
         # iterate over characters per line input
         for char in line:
-
+                
             # special symbol case or end of identifier
             if isSpecialSymbol(char) or char.isspace():
                 # end of word
@@ -106,12 +112,12 @@ with open('input.txt', 'r') as reader:
                             # if containing weird characters
                             if not ( character.isalpha() or character.isdigit() ):
                                 tokens[identifier] = 'Error!'
-                                identifier = ''
                                 break
                         # correct identifier
                         if identifier not in tokens.keys():
                             tokens[identifier] = 'Identifier'
-                            identifier = ''
+
+                        identifier = ''
                     
                     # just 1 letter
                     elif (identifier.isalpha()):
@@ -140,13 +146,26 @@ with open('input.txt', 'r') as reader:
                
                 elif isSpecialSymbol(char)=='COLON':
                     previous_char = ':'
+                elif isSpecialSymbol(char)=='EXCLAMATION':
+                    previous_char = '!'
                 elif isSpecialSymbol(char)=='SMALLER THAN sign':
-                    previous_char = '<'
+                    if previous_char == '=':
+                        tokens['=<']='SMALLER THAN or EQUAL sign'
+                        previous_char='' 
+                    else:
+                        previous_char='<'        
                 elif isSpecialSymbol(char)=='GREATER THAN sign':
-                    previous_char = '>'
+                    if previous_char == '=':
+                        tokens['=>']='GREATER THAN or EQUAL sign'
+                        previous_char='' 
+                    else:
+                        previous_char='>'
                 elif isSpecialSymbol(char)=='EQUAL sign':
                     if previous_char == ':':
                         tokens[':=']='ASSIGN'
+                        previous_char=''
+                    elif previous_char == '!':
+                        tokens['!=']='NOT EQUAL'
                         previous_char=''
                     elif previous_char == '<':
                         tokens['<=']='SMALLER THAN or EQUAL sign'
@@ -155,23 +174,26 @@ with open('input.txt', 'r') as reader:
                         tokens['>=']='GREATER THAN or EQUAL sign'
                         previous_char=''
                     else:
-                        tokens[char]=isSpecialSymbol(char)  
+                        previous_char = '='
                     
                 # else append to tokens dictionary
                 else:
                     # check first for previous char
-                    if previous_char == '<' or previous_char == '>':
+                    if previous_char == '<' or previous_char == '>' or previous_char=='=':
                         tokens[previous_char]=isSpecialSymbol(previous_char)
                         previous_char=''
                     # then append if not space
                     if not char.isspace():
                         tokens[char]=isSpecialSymbol(char)
-            
             # any other character 
             else:
                 # skip if in a comment
                 if not in_a_comment:
                     identifier += char
+
+            with open('test.txt', 'a') as tst:
+                tst.write(char + ' -- ' + identifier + '\n')
+            # print(char + ' -- ' + identifier)
 
         # to overwrite the output file just in case it's the 1st line
         if first_line:
@@ -186,4 +208,3 @@ with open('input.txt', 'r') as reader:
                 for key, item in tokens.items():
                     writer.write(key + ' : ' + item + '\n')
                 writer.write('--------------------\n')
-
