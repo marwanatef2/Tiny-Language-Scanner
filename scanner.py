@@ -66,145 +66,151 @@ def isFloat(string):
     except ValueError:
         return False
 
-with open('input.txt', 'r') as reader:
 
-    first_line = True
-    in_a_comment = False
+print("Please write the test cases in the input text file.")
+run = input('If ready, Enter "r" to run...\n')
 
-    # iterate over input lines
-    for line in reader:
-        
-        # add space to end of line
-        if not line[-1].isspace():
-            line += ' '
+while run=='r':
 
-        # dictionary of {tokenvalue : tokentype}
-        tokens = dict()
-        # string to add characters in to get a complete word
-        identifier = ''
-        
-        previous_char = ''
+    with open('input.txt', 'r') as reader:
 
-        # iterate over characters per line input
-        for char in line:
-                
-            # special symbol case or end of identifier
-            if isSpecialSymbol(char) or char.isspace():
-                # end of word
+        first_line = True
+        in_a_comment = False
 
-                # in case of reserved word, append to dict & reset identifier
-                if isReservedWord(identifier):
-                    tokens[identifier] = isReservedWord(identifier)
-                    identifier = ''
+        # iterate over input lines
+        for line in reader:
+            
+            # add space to end of line
+            if not line[-1].isspace():
+                line += ' '
 
-                # in case of number
-                elif identifier.isnumeric() or isFloat(identifier) :
-                    tokens[identifier] = 'Number'
-                    identifier = ''
+            # dictionary of {tokenvalue : tokentype}
+            tokens = dict()
+            # string to add characters in to get a complete word
+            identifier = ''
+            
+            previous_char = ''
 
-                # case random word or empty string
-                else:
+            # iterate over characters per line input
+            for char in line:
                     
-                    # possible identifier if starting with letter
-                    # more than 1 character
-                    if ( len(identifier)>1 and identifier[0].isalpha() ):
-                        for character in identifier:
-                            # if containing weird characters
-                            if not ( character.isalpha() or character.isdigit() ):
-                                tokens[identifier] = 'Error!'
-                                break
-                        # correct identifier
-                        if identifier not in tokens.keys():
+                # special symbol case or end of identifier
+                if isSpecialSymbol(char) or char.isspace():
+                    # end of word
+
+                    # in case of reserved word, append to dict & reset identifier
+                    if isReservedWord(identifier):
+                        tokens[identifier] = isReservedWord(identifier)
+                        identifier = ''
+
+                    # in case of number
+                    elif identifier.isnumeric() or isFloat(identifier) :
+                        tokens[identifier] = 'Number'
+                        identifier = ''
+
+                    # case random word or empty string
+                    else:
+                        
+                        # possible identifier if starting with letter
+                        # more than 1 character
+                        if ( len(identifier)>1 and identifier[0].isalpha() ):
+                            for character in identifier:
+                                # if containing weird characters
+                                if not ( character.isalpha() or character.isdigit() ):
+                                    tokens[identifier] = 'Error!'
+                                    break
+                            # correct identifier
+                            if identifier not in tokens.keys():
+                                tokens[identifier] = 'Identifier'
+
+                            identifier = ''
+                        
+                        # just 1 letter
+                        elif (identifier.isalpha()):
                             tokens[identifier] = 'Identifier'
+                            identifier = ''
 
-                        identifier = ''
-                    
-                    # just 1 letter
-                    elif (identifier.isalpha()):
-                        tokens[identifier] = 'Identifier'
-                        identifier = ''
+                        # empty str
+                        elif (len(identifier)==0):
+                            pass
+                        
+                        else:
+                            tokens[identifier] = 'Error!'
+                            identifier = ''
 
-                    # empty str
-                    elif (len(identifier)==0):
-                        pass
-                    
+                    # check for comments
+                    if isSpecialSymbol(char)=='OPEN CURLY BRACES':
+                        # {
+                        in_a_comment = True
+                        # indicate start of comment
+                        tokens[char]=isSpecialSymbol(char)+' - Start Comment'
+                    elif isSpecialSymbol(char)=='CLOSED CURLY BRACES':
+                        in_a_comment = False
+                        # indicate end of comment just in case it started already
+                        if '{' in tokens.keys():
+                            tokens[char]=isSpecialSymbol(char)+' - End Comment'
+                
+                    elif isSpecialSymbol(char)=='COLON':
+                        previous_char = ':'
+                    elif isSpecialSymbol(char)=='EXCLAMATION':
+                        previous_char = '!'
+                    elif isSpecialSymbol(char)=='SMALLER THAN sign':
+                        if previous_char == '=':
+                            tokens['=<']='SMALLER THAN or EQUAL sign'
+                            previous_char='' 
+                        else:
+                            previous_char='<'        
+                    elif isSpecialSymbol(char)=='GREATER THAN sign':
+                        if previous_char == '=':
+                            tokens['=>']='GREATER THAN or EQUAL sign'
+                            previous_char='' 
+                        else:
+                            previous_char='>'
+                    elif isSpecialSymbol(char)=='EQUAL sign':
+                        if previous_char == ':':
+                            tokens[':=']='ASSIGN'
+                            previous_char=''
+                        elif previous_char == '!':
+                            tokens['!=']='NOT EQUAL'
+                            previous_char=''
+                        elif previous_char == '<':
+                            tokens['<=']='SMALLER THAN or EQUAL sign'
+                            previous_char=''
+                        elif previous_char == '>':
+                            tokens['>=']='GREATER THAN or EQUAL sign'
+                            previous_char=''
+                        else:
+                            previous_char = '='
+                        
+                    # else append to tokens dictionary
                     else:
-                        tokens[identifier] = 'Error!'
-                        identifier = ''
-
-                # check for comments
-                if isSpecialSymbol(char)=='OPEN CURLY BRACES':
-                    # {
-                    in_a_comment = True
-                    # indicate start of comment
-                    tokens[char]=isSpecialSymbol(char)+' - Start Comment'
-                elif isSpecialSymbol(char)=='CLOSED CURLY BRACES':
-                    in_a_comment = False
-                    # indicate end of comment just in case it started already
-                    if '{' in tokens.keys():
-                        tokens[char]=isSpecialSymbol(char)+' - End Comment'
-               
-                elif isSpecialSymbol(char)=='COLON':
-                    previous_char = ':'
-                elif isSpecialSymbol(char)=='EXCLAMATION':
-                    previous_char = '!'
-                elif isSpecialSymbol(char)=='SMALLER THAN sign':
-                    if previous_char == '=':
-                        tokens['=<']='SMALLER THAN or EQUAL sign'
-                        previous_char='' 
-                    else:
-                        previous_char='<'        
-                elif isSpecialSymbol(char)=='GREATER THAN sign':
-                    if previous_char == '=':
-                        tokens['=>']='GREATER THAN or EQUAL sign'
-                        previous_char='' 
-                    else:
-                        previous_char='>'
-                elif isSpecialSymbol(char)=='EQUAL sign':
-                    if previous_char == ':':
-                        tokens[':=']='ASSIGN'
-                        previous_char=''
-                    elif previous_char == '!':
-                        tokens['!=']='NOT EQUAL'
-                        previous_char=''
-                    elif previous_char == '<':
-                        tokens['<=']='SMALLER THAN or EQUAL sign'
-                        previous_char=''
-                    elif previous_char == '>':
-                        tokens['>=']='GREATER THAN or EQUAL sign'
-                        previous_char=''
-                    else:
-                        previous_char = '='
-                    
-                # else append to tokens dictionary
+                        # check first for previous char
+                        if previous_char == '<' or previous_char == '>' or previous_char=='=':
+                            tokens[previous_char]=isSpecialSymbol(previous_char)
+                            previous_char=''
+                        # then append if not space
+                        if not char.isspace():
+                            tokens[char]=isSpecialSymbol(char)
+                # any other character 
                 else:
-                    # check first for previous char
-                    if previous_char == '<' or previous_char == '>' or previous_char=='=':
-                        tokens[previous_char]=isSpecialSymbol(previous_char)
-                        previous_char=''
-                    # then append if not space
-                    if not char.isspace():
-                        tokens[char]=isSpecialSymbol(char)
-            # any other character 
+                    # skip if in a comment
+                    if not in_a_comment:
+                        identifier += char
+
+
+            # to overwrite the output file just in case it's the 1st line
+            if first_line:
+                first_line = False
+                with open ('output.txt', 'w') as writer:
+                    for key, item in tokens.items():
+                        writer.write(key + ' : ' + item + '\n')
+                    writer.write('--------------------\n')
+            # append otherwise
             else:
-                # skip if in a comment
-                if not in_a_comment:
-                    identifier += char
+                with open ('output.txt', 'a') as writer:
+                    for key, item in tokens.items():
+                        writer.write(key + ' : ' + item + '\n')
+                    writer.write('--------------------\n')
 
-            with open('test.txt', 'a') as tst:
-                tst.write(char + ' -- ' + identifier + '\n')
-            # print(char + ' -- ' + identifier)
-
-        # to overwrite the output file just in case it's the 1st line
-        if first_line:
-            first_line = False
-            with open ('output.txt', 'w') as writer:
-                for key, item in tokens.items():
-                    writer.write(key + ' : ' + item + '\n')
-                writer.write('--------------------\n')
-        # append otherwise
-        else:
-            with open ('output.txt', 'a') as writer:
-                for key, item in tokens.items():
-                    writer.write(key + ' : ' + item + '\n')
-                writer.write('--------------------\n')
+    print("\nPlease check the output text file.")
+    run = input('Press "r" to run another test case, any other key to exit.\n')

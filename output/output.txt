@@ -1,0 +1,6 @@
+asd98 : Identifier
+= : EQUAL sign
+7 : Number
+--------------------
+sdsd#sdsd : Error!
+--------------------
