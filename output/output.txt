@@ -1,6 +1,10 @@
-asd98 : Identifier
+x : Identifier
 = : EQUAL sign
-7 : Number
+y : Identifier
+# : Error!
 --------------------
-sdsd#sdsd : Error!
+z : Identifier
+:= : ASSIGN
+4 : Number
+; : SEMICOLON
 --------------------

@@ -1,2 +1,2 @@
-asd98 = 7
-sdsd#sdsd
+x = y # {sda} * 2
+z:=4;

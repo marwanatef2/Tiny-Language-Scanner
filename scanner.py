@@ -67,7 +67,7 @@ def isFloat(string):
         return False
 
 
-print("Please write the test cases in the input text file.")
+print("Please write the test cases in the input text file then Save.")
 run = input('If ready, Enter "r" to run...\n')
 
 while run=='r':
@@ -80,6 +80,8 @@ while run=='r':
         # iterate over input lines
         for line in reader:
             
+            error_flag = False
+
             # add space to end of line
             if not line[-1].isspace():
                 line += ' '
@@ -118,6 +120,7 @@ while run=='r':
                                 # if containing weird characters
                                 if not ( character.isalpha() or character.isdigit() ):
                                     tokens[identifier] = 'Error!'
+                                    error_flag = True
                                     break
                             # correct identifier
                             if identifier not in tokens.keys():
@@ -137,6 +140,11 @@ while run=='r':
                         else:
                             tokens[identifier] = 'Error!'
                             identifier = ''
+                            error_flag = True
+
+                    if error_flag:
+                        print('\nError! Found token not in regular expressions.')
+                        break
 
                     # check for comments
                     if isSpecialSymbol(char)=='OPEN CURLY BRACES':
